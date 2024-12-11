@@ -2,9 +2,10 @@
 
 import React, { useState } from 'react'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import { alpha, AppBar, Box, Drawer, IconButton, InputBase, List, ListItem, ListItemText, styled, Toolbar } from '@mui/material';
+import { alpha, AppBar, Box, Divider, Drawer, IconButton, InputBase, List, ListItem, ListItemText, Menu, MenuItem, styled, Toolbar, Typography } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
+import Grid from '@mui/material/Grid2'
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -47,8 +48,19 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 
-function layout({children}) {
-  const [openDrawer , setOpenDrawer] = useState(false);
+function layout({ children }) {
+  const [openDrawer, setOpenDrawer] = useState(false);
+  const [anchorEl, setAnchorEl] = React.useState(null);
+
+  const open = Boolean(anchorEl);
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
 
   const toggleDrawer = (newOpen) => () => {
     setOpenDrawer(newOpen);
@@ -56,22 +68,22 @@ function layout({children}) {
 
   return (
     <>
-        <AppBar>
-          <Toolbar sx={{display:'flex', justifyContent:'space-between'}}>
-            <IconButton
-              size="large"
-              edge="start"
-              color="inherit"
-              sx={{ mr: 2 }}
-              onClick={toggleDrawer(true)}
-            >
-              <MenuIcon />
-            </IconButton>
+      <AppBar position='relative' sx={{ mb: '1em' }} >
+        <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <IconButton
+            size="large"
+            edge="start"
+            color="inherit"
+            sx={{ mr: 2 }}
+            onClick={toggleDrawer(true)}
+          >
+            <MenuIcon />
+          </IconButton>
 
-            <Drawer open={openDrawer} onClose={toggleDrawer(false)}>
-              <Box bgcolor='InfoBackground' color='white' sx={{minHeight:'100vh'}} width='20vw'>
+          <Drawer open={openDrawer} onClose={toggleDrawer(false)}>
+            <Box bgcolor='InfoBackground' sx={{ minHeight: '100vh' }} width='20vw'>
               {
-                ['Pacienes', 'Medicos'].map((item, index) => (
+                ['Pacientes', 'Medicos'].map((item, index) => (
                   <List key={index}>
                     <ListItem>
                       <ListItemText primary={item} />
@@ -79,23 +91,36 @@ function layout({children}) {
                   </List>
                 ))
               }
-              </Box>
-            </Drawer>
+            </Box>
+          </Drawer>
 
-            <Search>
-              <SearchIconWrapper>
-                <SearchIcon/>
-                </SearchIconWrapper>              
-              <StyledInputBase placeholder='Buscar paciente'/>
-            </Search>
+          <Search>
+            <SearchIconWrapper>
+              <SearchIcon />
+            </SearchIconWrapper>
+            <StyledInputBase placeholder='Buscar paciente' />
+          </Search>
 
-            
 
-            <IconButton size='large' color='inherit'><AccountCircleIcon/></IconButton>
-            
-          </Toolbar>
-        </AppBar>
+
+          <IconButton size='large' color='inherit'
+            aria-controls={open ? 'basic-perfil' : undefined}
+            aria-haspopup="true"
+            aria-expanded={open ? 'true' : undefined}
+            onClick={handleClick}
+          >
+            <AccountCircleIcon />
+          </IconButton>
+          <Menu id="basic-perfil" anchorEl={anchorEl} open={open} onClose={handleClose} >
+            <Typography ml='1em'>Perfil</Typography>
+            <Divider />
+            <MenuItem>Cerrar Sesión</MenuItem>
+          </Menu>
+        </Toolbar>
+      </AppBar>
+      <Grid sx={{m:'1.5em'}}>
         {children}
+      </Grid>
     </>
   )
 }
