@@ -4,6 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import Grid from "@mui/material/Grid2"
 import NavigationIcon from '@mui/icons-material/Navigation';
+import axios from "axios";
+import { useSnackbar } from "notistack";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
     const dataForm = [
@@ -14,27 +17,61 @@ export default function Home() {
         {label:'Correo', name:'correo', type:'email', required:true},
         {label:'Clave', name:'clave', type:'password', required:true}
     ]
-
+    const { enqueueSnackbar } = useSnackbar();
+    const router = useRouter();
     const [data, setData] = useState(
         dataForm.reduce((acc, item) =>{
             acc[item.name] = '';
             return acc;
         }, {})
     )
+    const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
-    setCredentials({
-      ...credentials,
+    setData({
+      ...data,
       [e.target.name] : e.target.value
     })
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    console.log(data);
 
+    try{
+      const response = await axios.post('/api/auth/register', data);
+      console.log("Response: ", response );
+      if(response.data.status == 200){
+        enqueueSnackbar("Medico/a creado exitosamente", {variant:"success"});
+        router.push("/");
+      }
+      if(response.data.status == 400){
+        enqueueSnackbar(`${response.data.message?.errors ? "Ingreso datos incorrectos" : response.data.message}`, {variant:"warning"});
+      }
+      if(response.data.message?.errors){
+        const resErrors = response.data.message.errors;
+        const keyErrors = Object.keys(resErrors);
+        setErrors(
+          keyErrors.reduce((acc, item) => {
+            const keyItem = item.toLowerCase();
+            acc[keyItem] = resErrors[item][0];
+            return acc;
+          },{})
+        )
+        console.log(errors);
+      }
+
+
+    }catch(error){
+      console.log("Error al hacer el POST: ", error);
+    }
+
+  }
 
   return (
     <>
       <Grid container size={12} justifyContent='center' sx={{minHeight:'100vh', bgcolor:'#00001a'}} alignContent='center' >
-        <Grid container component='form'   sx={{
+        <Grid container component='form' onSubmit={handleSubmit}  sx={{
             bgcolor: 'background.paper',
             boxShadow: 1,
             borderRadius: 2,
@@ -49,8 +86,8 @@ export default function Home() {
             dataForm.map((item, index) => (
                 <FormControl key={index}>
                     <InputLabel>{item.label}</InputLabel>
-                    <Input type={item.type} name={item.name} required onChange={handleChange}/>
-                    <FormHelperText></FormHelperText>
+                    <Input type={item.type} name={item.name} required onChange={handleChange} error={!!errors[item.name] }/>
+                    <FormHelperText>{errors[item.name] ?? errors[item.name]}</FormHelperText>
                 </FormControl>
             ))
           }

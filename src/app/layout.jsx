@@ -3,6 +3,7 @@
 import localFont from "next/font/local";
 import "./globals.css";
 import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
+import { SnackbarProvider } from "notistack";
 
 export default function RootLayout({ children }) {
 
@@ -22,8 +23,10 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
         <ThemeProvider theme={themeOptions}>
+        <SnackbarProvider maxSnack={3} autoHideDuration={1500}>
           <CssBaseline/>
-          {children}
+            {children}
+        </SnackbarProvider>
         </ThemeProvider>
       </body>
     </html>
