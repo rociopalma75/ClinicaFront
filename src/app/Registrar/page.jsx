@@ -40,7 +40,6 @@ export default function Home() {
 
     try{
       const response = await axios.post('/api/auth/register', data);
-      console.log("Response: ", response );
       if(response.data.status == 200){
         enqueueSnackbar("Medico/a creado exitosamente", {variant:"success"});
         router.push("/");

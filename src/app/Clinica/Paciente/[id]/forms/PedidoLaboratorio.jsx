@@ -1,20 +1,17 @@
-import { Box, Button, FormControl, FormHelperText, Input, InputLabel, Typography } from '@mui/material';
+import { Box, Button, FormControl, FormHelperText, Input, InputLabel, Typography } from '@mui/material'
 import React, { useState } from 'react'
 import Grid from '@mui/material/Grid2'
 import { useSnackbar } from 'notistack';
 import { useParams } from 'next/navigation';
 import axios from 'axios';
 
-function EvolucionTextoLibre({descripcion}) {
+//Recibe descripcion del diagnostico y el id de la evolucion
+function PedidoLaboratorio({ descripcion, idEvolucion }) {
     const { id } = useParams();
     const { enqueueSnackbar } = useSnackbar();
     const [data, setData] = useState({
-        informe: '',
+        descripcion: '', //Descripcion del pedidod
     })
-
-    const dataForm = {
-        title: 'Informe de la evolución', type:'text', name: 'informe', required: true
-    }
 
     const handleChange = (e) => {
         setData({
@@ -38,11 +35,11 @@ function EvolucionTextoLibre({descripcion}) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log(data);
-        
+
         try {
-            const response = await axios.post(`/api/paciente/${id}/diagnostico/${descripcion}`, data);
+            const response = await axios.post(`/api/paciente/${id}/diagnostico/${descripcion}/evolucion/${idEvolucion}/pedido`, data);
             if (response.data.status == 200) {
-                enqueueSnackbar("Evolucion creada exitosamente", { variant: "success" });
+                enqueueSnackbar("Pedido creado exitosamente", { variant: "success" });
                 setTimeout(() => {
                     window.location.reload();
                 }, 500); // 2000 ms = 2 seconds
@@ -57,17 +54,13 @@ function EvolucionTextoLibre({descripcion}) {
         <>
             <Box sx={style} component='form' onSubmit={handleSubmit}>
                 <Typography variant="h6" component="h2" sx={{ mb: 3 }}>
-                    Crear nueva evolucion de texto libre
+                    Registrar Pedido de Laboratorio
                 </Typography>
-                {
-                   
-                    <FormControl sx={{ width: '100%' }}>
-                        <InputLabel>{dataForm.title}</InputLabel>
-                        <Input fullWidth type={dataForm.type} name={dataForm.name} required onChange={handleChange} />
-                        <FormHelperText></FormHelperText>
-                    </FormControl>
-                    
-                }
+                <FormControl sx={{ width: '100%', mb: 2 }}>
+                    <InputLabel>Pedido de Laboratorio</InputLabel>
+                    <Input fullWidth type="text" name="descripcion" required onChange={handleChange} />
+                    <FormHelperText></FormHelperText>
+                </FormControl>
                 <Grid container justifyContent='center' sx={{ mt: 5 }}>
                     <Button variant='contained' color='success' sx={{ width: '40%' }} type='submit' >Confirmar</Button>
                 </Grid>
@@ -76,4 +69,4 @@ function EvolucionTextoLibre({descripcion}) {
     )
 }
 
-export default EvolucionTextoLibre
+export default PedidoLaboratorio

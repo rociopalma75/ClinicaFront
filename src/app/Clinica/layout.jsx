@@ -1,11 +1,14 @@
 'use client';
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import { alpha, AppBar, Box, Divider, Drawer, IconButton, InputBase, List, ListItem, ListItemText, Menu, MenuItem, styled, Toolbar, Typography } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
+import { alpha, AppBar,  Button, Divider, IconButton, InputBase, ListItemIcon, Menu, MenuItem, styled, Toolbar, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import Grid from '@mui/material/Grid2'
+import axios from 'axios';
+import Logout from '@mui/icons-material/Logout';
+import { useRouter } from 'next/navigation';
+import { useSnackbar } from 'notistack';
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -49,10 +52,11 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 
 
 function layout({ children }) {
-  const [openDrawer, setOpenDrawer] = useState(false);
   const [anchorEl, setAnchorEl] = React.useState(null);
-
+  const [profile, setProfile] = useState({});
   const open = Boolean(anchorEl);
+  const router = useRouter();
+  const { enqueueSnackbar } = useSnackbar();
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -61,46 +65,39 @@ function layout({ children }) {
     setAnchorEl(null);
   };
 
-
-  const toggleDrawer = (newOpen) => () => {
-    setOpenDrawer(newOpen);
+  const handleCloseSession = () => {
+    enqueueSnackbar("Cerrando sesión..", { variant:'warning' });
+    router.push('/');
   }
+
+
+  useEffect(() => {
+    try{
+      const fetchData = async () => {
+        const response = await axios.get('/api/profile');
+        const sessionData = JSON.parse(response.data.Sesion);
+        setProfile(sessionData);
+      }
+      fetchData();
+    }catch(error){
+      console.log("Error al hacer el get: ", error);
+    }
+  },[])
 
   return (
     <>
       <AppBar position='relative' sx={{ mb: '1em' }} >
-        <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            sx={{ mr: 2 }}
-            onClick={toggleDrawer(true)}
-          >
-            <MenuIcon />
-          </IconButton>
-
-          <Drawer open={openDrawer} onClose={toggleDrawer(false)}>
-            <Box bgcolor='InfoBackground' sx={{ minHeight: '100vh' }} width='20vw'>
-              {
-                ['Pacientes', 'Medicos'].map((item, index) => (
-                  <List key={index}>
-                    <ListItem>
-                      <ListItemText primary={item} />
-                    </ListItem>
-                  </List>
-                ))
-              }
-            </Box>
-          </Drawer>
-
+        <Toolbar sx={{ display: 'flex', justifyContent:'space-between' }}>
+          <Grid container direction="row"  m='auto'> 
           <Search>
             <SearchIconWrapper>
               <SearchIcon />
             </SearchIconWrapper>
             <StyledInputBase placeholder='Buscar paciente' />
+            
           </Search>
-
+          <Button variant='contained' sx={{backgroundColor:'background.paper', color:'black'}}>Buscar</Button>
+          </Grid>
 
 
           <IconButton size='large' color='inherit'
@@ -108,13 +105,22 @@ function layout({ children }) {
             aria-haspopup="true"
             aria-expanded={open ? 'true' : undefined}
             onClick={handleClick}
+            
           >
             <AccountCircleIcon />
           </IconButton>
-          <Menu id="basic-perfil" anchorEl={anchorEl} open={open} onClose={handleClose} >
-            <Typography ml='1em'>Perfil</Typography>
+          <Menu  id="basic-perfil" anchorEl={anchorEl} open={open} onClose={handleClose} >
+            <Typography m='1em'>{profile.Apellido}, {profile.Nombre}</Typography>
+            <Typography m='1em'>{profile.MatriculaMedica}</Typography>
+            <Typography m='1em'>{profile.Especialidad}</Typography>
+            <Typography m='1em'>{profile.Correo}</Typography>
             <Divider />
-            <MenuItem>Cerrar Sesión</MenuItem>
+            <MenuItem onClick={handleCloseSession}>
+              <ListItemIcon>
+                <Logout fontSize="small" />
+              </ListItemIcon>
+              Logout
+            </MenuItem>
           </Menu>
         </Toolbar>
       </AppBar>

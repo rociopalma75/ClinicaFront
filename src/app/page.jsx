@@ -1,12 +1,14 @@
 'use client';
-import { Box, Button, FormControl, FormHelperText, Input, InputLabel, Typography } from "@mui/material";
+import { Button, FormControl, FormHelperText, Input, InputLabel, Typography } from "@mui/material";
 import React, { useState } from "react";
 import Link from "next/link";
 import Grid from "@mui/material/Grid2"
 import { useRouter } from 'next/navigation';
 import axios from "axios";
+import { useSnackbar } from "notistack";
 
 export default function Home() {
+  const { enqueueSnackbar } = useSnackbar();
   const [credentials, setCredentials] = useState({
     correo: '',
     clave: ''
@@ -24,21 +26,20 @@ export default function Home() {
 
   const handleSubmit = async (e) => {
       e.preventDefault();
-      console.log(credentials);
 
       try{
           const response = await axios.post('/api/auth/login', credentials);
           
           if(response.status == 200){
-              router.push("/Clinica");
-              console.log(response);
+              enqueueSnackbar("Medico/a inicio sesión correctamente", {variant:"success"});
+              router.push("/Clinica/Paciente");
           }
           
       }catch(error){
           if(error.response){
             setError(error.response.data);
           }else{
-            setError("Post mal hecho");
+            setError("Error al hacer el POST");
           }
       }
   }
