@@ -65,9 +65,17 @@ function layout({ children }) {
     setAnchorEl(null);
   };
 
-  const handleCloseSession = () => {
-    enqueueSnackbar("Cerrando sesión..", { variant:'warning' });
-    router.push('/');
+  const handleCloseSession = async () => {
+    try{
+      const response = await axios.get('/api/auth/logout');
+      console.log(response.data);
+      if(response.data.status === 200){
+        enqueueSnackbar("Sesión cerrada exitosamente", {variant:"success"});
+        router.push('/');
+      }
+    }catch(error){
+      console.error("Error al cerrar sesión: ", error);
+    }
   }
 
 

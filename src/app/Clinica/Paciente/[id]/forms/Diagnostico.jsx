@@ -3,7 +3,6 @@ import React, { useState } from 'react'
 import Grid from '@mui/material/Grid2'
 import axios from 'axios';
 import { useSnackbar } from 'notistack';
-import { useParams } from 'next/navigation';
 
 function Diagnostico({updateList, idPaciente, handleClose}) {
     

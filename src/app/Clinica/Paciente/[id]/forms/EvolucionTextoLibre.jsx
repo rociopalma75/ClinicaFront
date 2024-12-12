@@ -2,11 +2,9 @@ import { Box, Button, FormControl, FormHelperText, Input, InputLabel, Typography
 import React, { useState } from 'react'
 import Grid from '@mui/material/Grid2'
 import { useSnackbar } from 'notistack';
-import { useParams } from 'next/navigation';
 import axios from 'axios';
 
-function EvolucionTextoLibre({descripcion}) {
-    const { id } = useParams();
+function EvolucionTextoLibre({ descripcion, idPaciente, handleClose}) {
     const { enqueueSnackbar } = useSnackbar();
     const [data, setData] = useState({
         informe: '',
@@ -37,12 +35,13 @@ function EvolucionTextoLibre({descripcion}) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log(data);
-        
+        const id = idPaciente;
         try {
             const response = await axios.post(`/api/paciente/${id}/diagnostico/${descripcion}`, data);
+            console.log(response.data);
             if (response.data.status == 200) {
                 enqueueSnackbar("Evolucion creada exitosamente", { variant: "success" });
+                handleClose();
                 setTimeout(() => {
                     window.location.reload();
                 }, 500); // 2000 ms = 2 seconds

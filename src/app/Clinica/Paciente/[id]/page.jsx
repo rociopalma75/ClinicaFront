@@ -15,6 +15,7 @@ import CardPedido from './components/CardPedido';
 import CardReceta from './components/CardReceta';
 import Link from 'next/link';
 import NavigationIcon from '@mui/icons-material/Navigation';
+import EvolucionPlantilla from './forms/EvolucionPlantilla';
 
 
 function page({ params }) {
@@ -33,7 +34,7 @@ function page({ params }) {
 
     const [activeButtonId, setActiveButtonId] = useState(null);
 
-    const [update, setUpdate] = useState(false);    
+    const [update, setUpdate] = useState(false); 
 
     const handleModalEvolTextoLibre = (stateBool) => {
         setModalEvolTextoLibre(stateBool);
@@ -53,23 +54,28 @@ function page({ params }) {
     }
 
     const handleUpdate = () => {
-        setUpdate(true);
+        setUpdate(!update);
     }
 
-    useEffect(() => {     
+    const fetchData = async () => {
         const id = unwrappedParams.id;   
-        const fetchData = async () => {
-            try {
-                const response = await axios.get(`/api/paciente/${id}`);
-                const dataResult = response.data.paciente;
-                setData(dataResult);
-            } catch (error) {
-                console.log("Error en la petición GET: ", error);
-            }
-        };
-        setUpdate(false);
-        fetchData();
-    }, [update])
+        try {
+            const response = await axios.get(`/api/paciente/${id}`);
+            const dataResult = response.data.paciente;
+            setData(dataResult);
+        } catch (error) {
+            console.log("Error en la petición GET: ", error);
+        }
+    };
+
+    useEffect(() => {     
+         fetchData();
+    },[update]);
+
+    const handleUpdateData = () => {
+        fetchData(); // Llama a la función que recarga los datos
+    };
+
 
     return (
         <>
@@ -118,8 +124,12 @@ function page({ params }) {
                         ))}
                     </SpeedDial>
 
-                    <Modal open={modalEvolTextoLibre} onClose={() => handleModalEvolTextoLibre(false)}>
-                        <EvolucionTextoLibre descripcion={nombreDiagnostico}/>
+                    <Modal open={modalEvolTextoLibre} onClose={() => {handleModalEvolTextoLibre(false); handleUpdate()}}>
+                        <EvolucionTextoLibre descripcion={nombreDiagnostico} idPaciente={unwrappedParams.id} handleClose={() => handleModalEvolTextoLibre(false)}/>
+                    </Modal>
+
+                    <Modal open={modalEvolPlantilla} onClose={() => {handleModalEvolPlantilla(false)}}>
+                        <EvolucionPlantilla  descripcion={nombreDiagnostico} idPaciente={unwrappedParams.id} handleClose={() => handleModalEvolPlantilla(false)}/>
                     </Modal>
 
                 </Grid>
